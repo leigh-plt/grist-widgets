@@ -1,0 +1,134 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Drop-down Widget</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script>
+    let allRecords = [];
+    let column = "";
+    
+    function ready(fn) {
+      if (document.readyState !== 'loading'){
+        fn();
+      } else {
+        document.addEventListener('DOMContentLoaded', fn);
+      }
+    }
+    
+    function initGrist() {
+      grist.ready({
+        columns: [{ name: "OptionsToSelect", title: 'Date', type: 'Date' }],
+        requiredAccess: 'read table',
+        allowSelectBy: true,
+      });
+      grist.onRecords(async function (records, mappings) {
+        if (!records || records.length === 0) {
+          grist.setSelectedRows(null);
+          return;
+        };
+    
+        allRecords = records;
+        column = mappings.OptionsToSelect;
+      });
+    
+      var date = new Date();
+      document.querySelector('#selectdate').value = date.toISOString().substr(0, 10);
+      document.querySelector('#selectdate').addEventListener('change', event => {selectRows(event.target.value)});
+      document.querySelector('#selectdate').trigger('change');
+    }
+    
+    async function selectRows(value) {
+      const rowIds = allRecords.filter((item) => item[column].toString() === value).map(({id})=> id);
+      grist.setSelectedRows(rowIds);   
+    }
+    
+    document.addEventListener('DOMContentLoaded', ready(initGrist));
+  </script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--grist-theme-page-bg);
+      color: var(--grist-theme-text);
+    }
+    .container,
+    .container-fluid,
+    .container-xxl,
+    .container-xl,
+    .container-lg,
+    .container-md,
+    .container-sm {
+      --bs-gutter-x: 1.5rem;
+      --bs-gutter-y: 0;
+      width: 75%;
+      padding-right: calc(var(--bs-gutter-x) * 0.5);
+      padding-left: calc(var(--bs-gutter-x) * 0.5);
+      margin-right: auto;
+      margin-left: auto;
+    }
+
+    @media (min-width: 576px) {
+      .container-sm, .container {
+        max-width: 540px;
+      }
+    }
+    @media (min-width: 768px) {
+      .container-md, .container-sm, .container {
+        max-width: 720px;
+      }
+    }
+    @media (min-width: 992px) {
+      .container-lg, .container-md, .container-sm, .container {
+        max-width: 960px;
+      }
+    }
+    @media (min-width: 1200px) {
+      .container-xl, .container-lg, .container-md, .container-sm, .container {
+        max-width: 1140px;
+      }
+    }
+    @media (min-width: 1400px) {
+      .container-xxl, .container-xl, .container-lg, .container-md, .container-sm, .container {
+        max-width: 1320px;
+      }
+    }
+    .input-group {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      width: 100%;
+      border: 1px solid #000;
+      border-radius: 10px;
+      border-spacing: 15px;
+    }
+    .form-control {
+      display: block;
+      width: 100%;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--bs-body-color);
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: var(--bs-body-bg);
+      background-clip: padding-box;
+      border: var(--bs-border-width) solid var(--bs-border-color);
+      border-radius: var(--bs-border-radius);
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="container text-center">
+    <div class="input-group date">
+      <input type="date" class="form-control" id="selectdate">
+    </div>
+  </div>
+  <p></p>
+</body>
+</html>
